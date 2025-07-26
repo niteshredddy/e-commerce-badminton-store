@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badminton World</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: #F5F6F5;
+            color: #0A0F1A;
+            overflow-x: hidden;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 8px solid #F5F6F5;
+            border-top: 8px solid #FF5733;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            z-index: 2000;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #0A0F1A;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            color: #F5F6F5;
+            font-size: 2rem;
+            font-weight: 700;
+            text-decoration: none;
+            font-family: 'Bebas Neue', sans-serif;
+            transition: color 0.3s;
+        }
+
+        .navbar-brand img {
+            height: 50px;
+            margin-right: 0.75rem;
+            transition: transform 0.3s;
+        }
+
+        .navbar-brand:hover img {
+            transform: scale(1.1);
+        }
+
+        .navbar-links a {
+            color: #F5F6F5;
+            margin: 0 1.5rem;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: color 0.3s, transform 0.2s;
+        }
+
+        .navbar-links a:hover {
+            color: #FF5733;
+            transform: translateY(-2px);
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .btn-primary {
+            background-color: #FF5733;
+            color: #F5F6F5;
+            border: none;
+            box-shadow: 0 4px 12px rgba(255, 87, 51, 0.4);
+        }
+
+        .btn-primary:hover {
+            background-color: #E64A19;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(255, 87, 51, 0.6);
+        }
+
+        .btn-primary:disabled {
+            background-color: #FF8A65;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: #F5F6F5;
+            border: 2px solid #F5F6F5;
+        }
+
+        .btn-secondary:hover {
+            background-color: #F5F6F5;
+            color: #0A0F1A;
+            transform: translateY(-3px);
+        }
+
+        .btn-loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #F5F6F5;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 0.5rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            padding: 1rem 0.3rem;
+            text-align: center;
+            color: #F5F6F5;
+            background-color: #0A0F1A;
+            z-index: 500;
+            margin-bottom: 4rem;
+        }
+
+        .hero img {
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            animation: parallax 12s linear infinite;
+        }
+
+        @keyframes parallax {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0); }
+        }
+
+        .hero h1 {
+            font-size: 1.5rem;
+            font-family: 'Bebas Neue', sans-serif;
+            margin-bottom: 0.3rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            font-size: 0.8rem;
+            margin-bottom: 0.8rem;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .hero-buttons .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .countdown-timer {
+            font-size: 1rem;
+            color: #FFD166;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 600;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-family: 'Bebas Neue', sans-serif;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #0A0F1A;
+            text-transform: uppercase;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .product-card {
+            background-color: #F5F6F5;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .product-card-content {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .product-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-card p {
+            font-size: 0.9rem;
+            color: #4A4E69;
+            margin-bottom: 1rem;
+        }
+
+        .product-card .price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #FFD166;
+            margin-bottom: 1rem;
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #FF5733;
+            color: #F5F6F5;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Search and Sort */
+        .search-sort {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-sort input {
+            padding: 0.75rem;
+            width: 300px;
+            border: 2px solid #4A4E69;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-sort select {
+            padding: 0.75rem;
+            border: 2px solid #4A4E69;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #0A0F1A;
+            color: #F5F6F5;
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 500;
+            margin-top: 4rem;
+        }
+
+        .footer a {
+            color: #FF5733;
+            text-decoration: none;
+            margin: 0 1rem;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: #FFD166;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0A0F1A;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            padding-left: 2.5rem;
+            border: 2px solid #4A4E69;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: #FF5733;
+            outline: none;
+            box-shadow: 0 0 8px rgba(255, 87, 51, 0.3);
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-20%);
+            color: #4A4E69;
+        }
+
+        .show-password {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-20%);
+            cursor: pointer;
+            color: #4A4E69;
+        }
+
+        .error-text {
+            color: #FF5733;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Table */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+
+        .table th, .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #4A4E69;
+        }
+
+        .table th {
+            background-color: #0A0F1A;
+            color: #F5F6F5;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.2rem;
+        }
+
+        /* Error Message */
+        .error-message {
+            color: #FF5733;
+            text-align: center;
+            margin: 2rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Sticky Cart Icon */
+        .cart-icon {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: #FF5733;
+            color: #F5F6F5;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            z-index: 1000;
+        }
+
+        .cart-icon:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .cart-icon span {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #FFD166;
+            color: #0A0F1A;
+            border-radius: 50%;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        /* Login Page */
+        .login-container {
+            background: linear-gradient(135deg, #0A0F1A 0%, #1A2335 100%);
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            color: #F5F6F5;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .login-container h3 {
+            color: #F5F6F5;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-container .form-group label {
+            color: #F5F6F5;
+        }
+
+        .login-container .form-group input {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: #4A4E69;
+            color: #F5F6F5;
+        }
+
+        .login-container .form-group input:focus {
+            border-color: #FF5733;
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: right;
+            margin-top: 0.5rem;
+            color: #FFD166;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password:hover {
+            color: #FF5733;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background-color: #F5F6F5;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 1rem;
+        }
+
+        /* Admin Dashboard */
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .admin-tabs button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background-color: #4A4E69;
+            color: #F5F6F5;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .admin-tabs button.active {
+            background-color: #FF5733;
+        }
+
+        .admin-tabs button:hover {
+            background-color: #FF5733;
+        }
+
+        .overview-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .overview-card {
+            background-color: #F5F6F5;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .overview-card h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .overview-card p {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FF5733;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar .container {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .navbar-links {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 1.2rem;
+            }
+
+            .hero p {
+                font-size: 0.7rem;
+            }
+
+            .hero img {
+                max-width: 100%;
+            }
+
+            .hero-buttons .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .countdown-timer {
+                font-size: 0.8rem;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-sort {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-sort input {
+                width: 100%;
+            }
+
+            .login-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Spinner -->
+        <div v-if="isLoading" class="loading-spinner"></div>
+        <!-- Error State -->
+        <div v-if="error" class="error-message">{{ error }}</div>
+
+        <!-- Navbar -->
+        <nav class="navbar" v-if="!isLoading && !error">
+            <div class="container">
+                <a href="#" class="navbar-brand">
+                    <img src="/static/logo.png" alt="Badminton World Logo">
+                    Badminton World
+                </a>
+                <div class="navbar-links">
+                    <a href="#" @click="currentPage = 'home'">Home</a>
+                    <a href="#" @click="currentPage = 'products'">Products</a>
+                    <a href="#" v-if="currentUser && currentUser.isAdmin" @click="currentPage = 'admin'">Admin Dashboard</a>
+                </div>
+                <div class="navbar-actions">
+                    <a href="#" class="btn btn-primary" @click="currentPage = 'login'" v-if="!currentUser">Login</a>
+                    <span v-if="currentUser">
+                        <span style="color: #F5F6F5; margin-right: 1rem;">{{ currentUser.name }}</span>
+                        <a href="#" class="btn btn-secondary" @click="logout">Logout</a>
+                    </span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Sticky Cart Icon -->
+        <div class="cart-icon" @click="currentPage = 'cart'" v-if="!isLoading && !error">
+            <i class="fas fa-shopping-cart"></i>
+            <span v-if="getTotalCartItems() > 0">{{ getTotalCartItems() }}</span>
+        </div>
+
+        <!-- Home Page -->
+        <div v-if="currentPage === 'home' && !isLoading && !error">
+            <div class="hero">
+                <img src="/static/hero.jpg" alt="Badminton Hero Image" @error="handleImageError">
+                <h1>Smash the Court with Badminton World</h1>
+                <p>Unleash your potential with our premium badminton gear designed for champions.</p>
+                <div class="hero-buttons">
+                    <a href="#" class="btn btn-primary" @click="currentPage = 'products'">Shop Now</a>
+                    <a href="#" class="btn btn-primary" @click="currentPage = 'products'">Show Products</a>
+                </div>
+                <div class="countdown-timer">Sale Ends in {{ countdownTimer }}!</div>
+            </div>
+
+            <div class="container">
+                <h2 class="section-title">Featured Products</h2>
+                <div class="product-grid">
+                    <div v-for="product in products.slice(0, 6)" :key="product.id" class="product-card">
+                        <div class="product-badge" v-if="product.id <= 3">Best Seller</div>
+                        <div class="product-badge" v-else-if="product.id <= 6">New Arrival</div>
+                        <img :src="product.image" :alt="product.name" @error="handleImageError">
+                        <div class="product-card-content">
+                            <h3>{{ product.name }}</h3>
+                            <p>{{ product.description.substring(0, 80) }}...</p>
+                            <div class="price">₹{{ product.price.toFixed(2) }}</div>
+                            <a href="#" class="btn btn-primary" @click="addToCart(product)">Add to Cart</a>
+                            <a href="#" class="btn btn-secondary" @click="viewProduct(product)">Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Page -->
+        <div v-if="currentPage === 'products' && !isLoading && !error">
+            <div class="container">
+                <h2 class="section-title">Our Products</h2>
+                <div class="search-sort">
+                    <input type="text" v-model="searchQuery" placeholder="Search products..." @input="searchProducts">
+                    <select v-model="sortOption" @change="sortProducts">
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="price-asc">Price (Low to High)</option>
+                        <option value="price-desc">Price (High to Low)</option>
+                    </select>
+                </div>
+                <div class="product-grid">
+                    <div v-for="product in filteredProducts" :key="product.id" class="product-card">
+                        <div class="product-badge" v-if="product.id <= 3">Best Seller</div>
+                        <div class="product-badge" v-else-if="product.id <= 6">New Arrival</div>
+                        <img :src="product.image" :alt="product.name" @error="handleImageError">
+                        <div class="product-card-content">
+                            <h3>{{ product.name }}</h3>
+                            <p>{{ product.description.substring(0, 80) }}...</p>
+                            <div class="price">₹{{ product.price.toFixed(2) }}</div>
+                            <a href="#" class="btn btn-primary" @click="addToCart(product)">Add to Cart</a>
+                            <a href="#" class="btn btn-secondary" @click="viewProduct(product)">Details</a>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="!filteredProducts.length" class="error-message">
+                    No products found. Try a different search term.
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details Page -->
+        <div v-if="currentPage === 'product-details' && !isLoading && !error">
+            <div class="container">
+                <nav style="margin-bottom: 1.5rem;">
+                    <a href="#" @click="currentPage = 'home'">Home</a> / 
+                    <a href="#" @click="currentPage = 'products'">Products</a> / 
+                    <span>{{ currentProduct.name }}</span>
+                </nav>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                    <img :src="currentProduct.image" :alt="currentProduct.name" style="max-width: 500px; width: 100%; border-radius: 15px;" @error="handleImageError">
+                    <div style="flex: 1;">
+                        <h2>{{ currentProduct.name }}</h2>
+                        <div class="price">₹{{ currentProduct.price.toFixed(2) }}</div>
+                        <p>{{ currentProduct.description }}</p>
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <button class="btn btn-secondary" @click="currentQuantity > 1 ? currentQuantity-- : null">-</button>
+                                <input type="number" v-model="currentQuantity" min="1" style="width: 80px; text-align: center;">
+                                <button class="btn btn-secondary" @click="currentQuantity++">+</button>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-primary" @click="addToCart(currentProduct)">Add to Cart</button>
+                            <button class="btn btn-secondary" @click="currentPage = 'checkout'">Buy Now</button>
+                        </div>
+                        <div style="margin-top: 2rem;">
+                            <h3>Product Details</h3>
+                            <p><strong>Category:</strong> {{ currentProduct.category }}</p>
+                            <p><strong>In Stock:</strong> {{ currentProduct.stock > 0 ? 'Yes' : 'No' }}</p>
+                            <p><strong>Weight:</strong> {{ currentProduct.weight }} g</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Page -->
+        <div v-if="currentPage === 'cart' && !isLoading && !error">
+            <div class="container">
+                <h2 class="section-title">Your Shopping Cart</h2>
+                <div v-if="!cart.length" class="error-message">
+                    Your cart is empty. Start shopping now!
+                    <a href="#" class="btn btn-primary" @click="currentPage = 'products'">Shop Now</a>
+                </div>
+                <div v-else>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in cart" :key="item.id">
+                                <td>{{ item.name }}</td>
+                                <td>₹{{ item.price.toFixed(2) }}</td>
+                                <td>
+                                    <button class="btn btn-secondary" @click="updateQuantity(item, item.quantity - 1)">-</button>
+                                    <input type="number" v-model="item.quantity" min="1" style="width: 80px; text-align: center;">
+                                    <button class="btn btn-secondary" @click="updateQuantity(item, item.quantity + 1)">+</button>
+                                </td>
+                                <td>₹{{ (item.price * item.quantity).toFixed(2) }}</td>
+                                <td><button class="btn btn-primary" @click="removeFromCart(item)">Remove</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="max-width: 400px; margin-left: auto;">
+                        <h3>Order Summary</h3>
+                        <p>Subtotal: ₹{{ calculateTotal().toFixed(2) }}</p>
+                        <p>Shipping: ₹{{ calculateShipping().toFixed(2) }}</p>
+                        <p>Tax: ₹{{ calculateTax().toFixed(2) }}</p>
+                        <p><strong>Total:</strong> ₹{{ calculateGrandTotal().toFixed(2) }}</p>
+                        <button class="btn btn-primary" @click="currentPage = 'checkout'">Proceed to Checkout</button>
+                        <a href="#" class="btn btn-secondary" @click="currentPage = 'products'">Continue Shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout Page -->
+        <div v-if="currentPage === 'checkout' && !isLoading && !error">
+            <div class="container">
+                <h2 class="section-title">Checkout</h2>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                    <div style="flex: 2;">
+                        <h3>Shipping Information</h3>
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input v-model="checkoutForm.firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input v-model="checkoutForm.lastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input v-model="checkoutForm.email" type="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input v-model="checkoutForm.address" required>
+                        </div>
+                        <div class="form-group">
+                            <label>City</label>
+                            <input v-model="checkoutForm.city" required>
+                        </div>
+                        <div class="form-group">
+                            <label>State</label>
+                            <input v-model="checkoutForm.state" required>
+                        </div>
+                        <div class="form-group">
+                            <label>ZIP Code</label>
+                            <input v-model="checkoutForm.zip" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input v-model="checkoutForm.phone" required>
+                        </div>
+
+                        <h3>Payment Information</h3>
+                        <div class="form-group">
+                            <label>Name on Card</label>
+                            <input v-model="paymentForm.name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Card Number</label>
+                            <input v-model="paymentForm.cardNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Expiration Month</label>
+                            <select v-model="paymentForm.expMonth" required>
+                                <option v-for="i in 12" :key="i" :value="i">{{ i }}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Expiration Year</label>
+                            <select v-model="paymentForm.expYear" required>
+                                <option v-for="i in 10" :key="i" :value="currentYear + i - 1">{{ currentYear + i - 1 }}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input v-model="paymentForm.cvv" required>
+                        </div>
+                    </div>
+                    <div style="flex: 1;">
+                        <h3>Order Summary</h3>
+                        <div v-for="item in cart" :key="item.id">
+                            <p>{{ item.name }} × {{ item.quantity }}</p>
+                            <p>₹{{ (item.price * item.quantity).toFixed(2) }}</p>
+                        </div>
+                        <p>Subtotal: ₹{{ calculateTotal().toFixed(2) }}</p>
+                        <p>Shipping: ₹{{ calculateShipping().toFixed(2) }}</p>
+                        <p>Tax: ₹{{ calculateTax().toFixed(2) }}</p>
+                        <p><strong>Total:</strong> ₹{{ calculateGrandTotal().toFixed(2) }}</p>
+                        <button class="btn btn-primary" @click="placeOrder">Place Order</button>
+                        <a href="#" class="btn btn-secondary" @click="currentPage = 'cart'">Back to Cart</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Confirmation Page -->
+        <div v-if="currentPage === 'order-confirmation' && !isLoading && !error">
+            <div class="container">
+                <h2 class="section-title">Thank You for Your Order!</h2>
+                <p>Your order #{{ currentOrder.id }} has been placed successfully.</p>
+                <p>We've sent a confirmation email to {{ checkoutForm.email }}.</p>
+                <div>
+                    <h3>Order Details</h3>
+                    <div>
+                        <h4>Shipping Information</h4>
+                        <p>{{ checkoutForm.firstName }} {{ checkoutForm.lastName }}</p>
+                        <p>{{ checkoutForm.address }}</p>
+                        <p>{{ checkoutForm.city }}, {{ checkoutForm.state }} {{ checkoutForm.zip }}</p>
+                        <p>Phone: {{ checkoutForm.phone }}</p>
+                    </div>
+                    <div>
+                        <h4>Order Summary</h4>
+                        <p>Order Date: {{ new Date().toLocaleDateString() }}</p>
+                        <p>Payment Method: Credit Card</p>
+                        <p>Order Total: ₹{{ calculateGrandTotal().toFixed(2) }}</p>
+                    </div>
+                    <div>
+                        <h4>Items Ordered</h4>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in currentOrder.items" :key="item.id">
+                                    <td>{{ item.name }}</td>
+                                    <td>₹{{ item.price.toFixed(2) }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>₹{{ (item.price * item.quantity).toFixed(2) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <a href="#" class="btn btn-primary" @click="currentPage = 'products'">Continue Shopping</a>
+            </div>
+        </div>
+
+        <!-- Login/Register Page -->
+        <div v-if="currentPage === 'login' && !isLoading && !error">
+            <div class="container">
+                <h2 class="section-title">Login or Register</h2>
+                <div class="login-container">
+                    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                        <div style="flex: 1;">
+                            <h3>Login to Your Account</h3>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <i class="fas fa-envelope"></i>
+                                <input v-model="loginForm.email" type="email" required @input="validateLoginForm">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <i class="fas fa-lock"></i>
+                                <input :type="showPassword ? 'text' : 'password'" v-model="loginForm.password" required @input="validateLoginForm">
+                                <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'" class="show-password" @click="showPassword = !showPassword"></i>
+                            </div>
+                            <div class="form-group">
+                                <label><input type="checkbox" v-model="loginForm.remember"> Remember me</label>
+                                <a href="#" class="forgot-password" @click="showForgotPasswordModal = true">Forgot Password?</a>
+                            </div>
+                            <div class="error-text" v-if="loginError">{{ loginError }}</div>
+                            <button class="btn btn-primary" @click="login" :disabled="isLoginButtonDisabled || isSubmitting" :class="{ 'btn-loading': isSubmitting }">
+                                {{ isSubmitting ? 'Logging in' : 'Login' }}
+                            </button>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>Create an Account</h3>
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input v-model="registerForm.name" required @input="validateRegisterForm">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <i class="fas fa-envelope"></i>
+                                <input v-model="registerForm.email" type="email" required @input="validateRegisterForm">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <i class="fas fa-lock"></i>
+                                <input :type="showRegisterPassword ? 'text' : 'password'" v-model="registerForm.password" required @input="validateRegisterForm">
+                                <i :class="showRegisterPassword ? 'fas fa-eye-slash' : 'fas fa-eye'" class="show-password" @click="showRegisterPassword = !showRegisterPassword"></i>
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm Password</label>
+                                <i class="fas fa-lock"></i>
+                                <input :type="showRegisterPassword ? 'text' : 'password'" v-model="registerForm.confirmPassword" required @input="validateRegisterForm">
+                            </div>
+                            <div class="error-text" v-if="registerError">{{ registerError }}</div>
+                            <button class="btn btn-primary" @click="register" :disabled="isRegisterButtonDisabled || isSubmitting" :class="{ 'btn-loading': isSubmitting }">
+                                {{ isSubmitting ? 'Registering' : 'Register' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forgot Password Modal -->
+        <div class="modal" v-if="showForgotPasswordModal">
+            <div class="modal-content">
+                <h3>Reset Password</h3>
+                <p>Enter your email address, and we'll send you a link to reset your password.</p>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input v-model="forgotPasswordEmail" type="email" required>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button class="btn btn-secondary" @click="showForgotPasswordModal = false">Cancel</button>
+                    <button class="btn btn-primary" @click="resetPassword">Send Reset Link</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div v-if="currentPage === 'admin' && currentUser && currentUser.isAdmin && !isLoading && !error">
+            <div class="container">
+                <h2 class="section-title">Admin Dashboard</h2>
+                <div class="admin-tabs">
+                    <button :class="{ active: adminTab === 'overview' }" @click="adminTab = 'overview'">Overview</button>
+                    <button :class="{ active: adminTab === 'products' }" @click="adminTab = 'products'">Products</button>
+                    <button :class="{ active: adminTab === 'orders' }" @click="adminTab = 'orders'">Orders</button>
+                    <button :class="{ active: adminTab === 'users' }" @click="adminTab = 'users'">Users</button>
+                    <button :class="{ active: adminTab === 'product-analytics' }" @click="adminTab = 'product-analytics'">Product Analytics</button>
+                    <button :class="{ active: adminTab === 'user-activity' }" @click="adminTab = 'user-activity'">User Activity</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div v-if="adminTab === 'overview'">
+                    <h3>Dashboard Overview</h3>
+                    <div class="overview-cards">
+                        <div class="overview-card">
+                            <h4>Total Products</h4>
+                            <p>{{ products.length }}</p>
+                        </div>
+                        <div class="overview-card">
+                            <h4>Total Orders</h4>
+                            <p>{{ orders.length }}</p>
+                        </div>
+                        <div class="overview-card">
+                            <h4>Total Users</h4>
+                            <p>{{ users.length }}</p>
+                        </div>
+                        <div class="overview-card">
+                            <h4>Total Revenue</h4>
+                            <p>₹{{ calculateTotalRevenue().toFixed(2) }}</p>
+                        </div>
+                    </div>
+                    <h3>Recent Orders</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="order in orders.slice(0, 5)" :key="order.id">
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.customer.firstName }} {{ order.customer.lastName }}</td>
+                                <td>{{ new Date(order.date).toLocaleDateString() }}</td>
+                                <td>₹{{ order.total.toFixed(2) }}</td>
+                                <td>{{ order.status }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Products Management -->
+                <div v-if="adminTab === 'products'">
+                    <h3>Products Management</h3>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <button class="btn btn-primary" @click="openProductForm()">Add New Product</button>
+                        <div>
+                            <button class="btn btn-secondary" @click="exportProducts">Export Products</button>
+                            <button class="btn btn-primary" @click="deleteSelectedProducts" :disabled="!selectedProducts.length">Delete Selected</button>
+                        </div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" v-model="selectAllProducts" @change="toggleSelectAllProducts"></th>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="product in products" :key="product.id">
+                                <td><input type="checkbox" :value="product.id" v-model="selectedProducts"></td>
+                                <td>{{ product.id }}</td>
+                                <td><img :src="product.image" :alt="product.name" style="width: 50px;" @error="handleImageError"></td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category }}</td>
+                                <td>₹{{ product.price.toFixed(2) }}</td>
+                                <td>{{ product.stock }}</td>
+                                <td>
+                                    <button class="btn btn-secondary" @click="openProductForm(product)">Edit</button>
+                                    <button class="btn btn-primary" @click="deleteProduct(product.id)">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div v-if="showProductForm">
+                        <h3>{{ editingProduct ? 'Edit Product' : 'Add New Product' }}</h3>
+                        <div>
+                            <div class="form-group">
+                                <label>Product Name</label>
+                                <input v-model="productForm.name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select v-model="productForm.category" required>
+                                    <option value="rackets">Rackets</option>
+                                    <option value="shuttlecocks">Shuttlecocks</option>
+                                    <option value="footwear">Footwear</option>
+                                    <option value="apparel">Apparel</option>
+                                    <option value="accessories">Accessories</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Price (₹)</label>
+                                <input v-model="productForm.price" type="number" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Stock</label>
+                                <input v-model="productForm.stock" type="number" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea v-model="productForm.description" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Image URL</label>
+                                <input v-model="productForm.image" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Weight (g)</label>
+                                <input v-model="productForm.weight" type="number" required>
+                            </div>
+                            <button class="btn btn-secondary" @click="showProductForm = false">Cancel</button>
+                            <button class="btn btn-primary" @click="saveProduct">Save Product</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders Management -->
+                <div v-if="adminTab === 'orders'">
+                    <h3>Orders Management</h3>
+                    <button class="btn btn-secondary" @click="exportOrders">Export Orders</button>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="order in orders" :key="order.id">
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.customer.firstName }} {{ order.customer.lastName }}</td>
+                                <td>{{ new Date(order.date).toLocaleDateString() }}</td>
+                                <td>₹{{ order.total.toFixed(2) }}</td>
+                                <td>{{ order.status }}</td>
+                                <td>
+                                    <button class="btn btn-secondary" @click="viewOrder(order)">View</button>
+                                    <button class="btn btn-primary" @click="deleteOrder(order.id)">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div v-if="selectedOrder">
+                        <h3>Order #{{ selectedOrder.id }}</h3>
+                        <div>
+                            <h4>Customer Information</h4>
+                            <p>{{ selectedOrder.customer.firstName }} {{ selectedOrder.customer.lastName }}</p>
+                            <p>{{ selectedOrder.customer.email }}</p>
+                            <p>{{ selectedOrder.customer.phone }}</p>
+                            <h4>Shipping Address</h4>
+                            <p>{{ selectedOrder.customer.address }}</p>
+                            <p>{{ selectedOrder.customer.city }}, {{ selectedOrder.customer.state }} {{ selectedOrder.customer.zip }}</p>
+                            <h4>Order Details</h4>
+                            <p>Date: {{ new Date(selectedOrder.date).toLocaleDateString() }}</p>
+                            <p>Status: {{ selectedOrder.status }}</p>
+                            <select v-model="selectedOrder.status">
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="canceled">Canceled</option>
+                            </select>
+                            <button class="btn btn-primary" @click="updateOrderStatus">Update Status</button>
+                        </div>
+                        <div>
+                            <h4>Order Items</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="item in selectedOrder.items" :key="item.id">
+                                        <td>{{ item.name }}</td>
+                                        <td>₹{{ item.price.toFixed(2) }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>₹{{ (item.price * item.quantity).toFixed(2) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3">Subtotal:</td>
+                                        <td>₹{{ selectedOrder.subtotal.toFixed(2) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3">Shipping:</td>
+                                        <td>₹{{ selectedOrder.shipping.toFixed(2) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3">Tax:</td>
+                                        <td>₹{{ selectedOrder.tax.toFixed(2) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3">Total:</td>
+                                        <td>₹{{ selectedOrder.total.toFixed(2) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-secondary" @click="selectedOrder = null">Close</button>
+                    </div>
+                </div>
+
+                <!-- Users Management -->
+                <div v-if="adminTab === 'users'">
+                    <h3>Users Management</h3>
+                    <button class="btn btn-secondary" @click="exportUsers">Export Users</button>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Registered On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="user in users" :key="user.id">
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.isAdmin ? 'Admin' : 'Customer' }}</td>
+                                <td>{{ new Date(user.createdAt).toLocaleDateString() }}</td>
+                                <td>
+                                    <button class="btn btn-secondary" @click="toggleUserRole(user)">{{ user.isAdmin ? 'Make Customer' : 'Make Admin' }}</button>
+                                    <button class="btn btn-primary" @click="deleteUser(user.id)">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Product Analytics -->
+                <div v-if="adminTab === 'product-analytics'">
+                    <h3>Product Analytics</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Name</th>
+                                <th>Total Sales</th>
+                                <th>Stock Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="product in productAnalytics" :key="product.id">
+                                <td>{{ product.id }}</td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.totalSales }} units</td>
+                                <td :style="{ color: product.stock < 5 ? '#FF5733' : '#4A4E69' }">
+                                    {{ product.stock < 5 ? 'Low Stock' : 'In Stock' }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- User Activity -->
+                <div v-if="adminTab === 'user-activity'">
+                    <h3>User Activity Logs</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="activity in userActivityLogs" :key="activity.id">
+                                <td>{{ activity.userName }}</td>
+                                <td>{{ activity.action }}</td>
+                                <td>{{ new Date(activity.timestamp).toLocaleString() }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer" v-if="!isLoading && !error">
+            <div class="container">
+                <h3>Badminton World</h3>
+                <p>Your ultimate destination for premium badminton gear. Crafted for champions, designed for excellence.</p>
+                <div style="margin: 2rem 0;">
+                    <h4>Shop</h4>
+                    <a href="#" @click="currentPage = 'products'">Rackets</a>
+                    <a href="#" @click="currentPage = 'products'">Shuttlecocks</a>
+                    <a href="#" @click="currentPage = 'products'">Footwear</a>
+                    <a href="#" @click="currentPage = 'products'">Apparel</a>
+                    <a href="#" @click="currentPage = 'products'">Accessories</a>
+                </div>
+                <div>
+                    <h4>Stay Connected</h4>
+                    <div>
+                        <input type="email" placeholder="Enter Your Email" v-model="newsletterEmail" required>
+                        <button class="btn btn-primary" @click="subscribeNewsletter">Subscribe</button>
+                    </div>
+                </div>
+                <div style="margin-top: 2rem;">
+                    <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="#">Shipping Policy</a>
+                </div>
+                <p style="margin-top: 1rem;">© 2025 Badminton World. All Rights Reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                isLoading: true,
+                error: null,
+                currentPage: 'home',
+                currentUser: null,
+                products: [],
+                filteredProducts: [],
+                searchQuery: '',
+                sortOption: 'name-asc',
+                countdownTimer: '',
+                currentProduct: null,
+                currentQuantity: 1,
+                cart: [],
+                checkoutForm: {
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    address: '',
+                    city: '',
+                    state: '',
+                    zip: '',
+                    phone: ''
+                },
+                paymentForm: {
+                    name: '',
+                    cardNumber: '',
+                    expMonth: '1',
+                    expYear: new Date().getFullYear(),
+                    cvv: ''
+                },
+                loginForm: {
+                    email: '',
+                    password: '',
+                    remember: false
+                },
+                registerForm: {
+                    name: '',
+                    email: '',
+                    password: '',
+                    confirmPassword: ''
+                },
+                loginError: '',
+                registerError: '',
+                showPassword: false,
+                showRegisterPassword: false,
+                showForgotPasswordModal: false,
+                forgotPasswordEmail: '',
+                isSubmitting: false,
+                currentOrder: null,
+                adminTab: 'overview',
+                showProductForm: false,
+                editingProduct: null,
+                productForm: {
+                    name: '',
+                    category: 'rackets',
+                    price: 0,
+                    stock: 0,
+                    description: '',
+                    image: '',
+                    weight: 0
+                },
+                orders: [],
+                selectedOrder: null,
+                users: [],
+                userActivityLogs: [],
+                selectedProducts: [],
+                selectAllProducts: false,
+                newsletterEmail: '',
+                currentYear: new Date().getFullYear()
+            },
+            computed: {
+                isLoginButtonDisabled() {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    return !emailRegex.test(this.loginForm.email) || this.loginForm.password.length < 6;
+                },
+                isRegisterButtonDisabled() {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    return !this.registerForm.name ||
+                           !emailRegex.test(this.registerForm.email) ||
+                           this.registerForm.password.length < 6 ||
+                           this.registerForm.password !== this.registerForm.confirmPassword;
+                },
+                productAnalytics() {
+                    return this.products.map(product => {
+                        const sales = this.orders.reduce((total, order) => {
+                            const orderItem = order.items.find(item => item.id === product.id);
+                            return total + (orderItem ? orderItem.quantity : 0);
+                        }, 0);
+                        return {
+                            ...product,
+                            totalSales: sales
+                        };
+                    });
+                }
+            },
+            methods: {
+                async fetchProducts() {
+                    try {
+                        this.isLoading = true;
+                        const response = await axios.get('/api/products', { timeout: 5000 });
+                        this.products = response.data;
+                        this.filteredProducts = response.data;
+                        this.sortProducts();
+                        this.error = null;
+                    } catch (error) {
+                        console.error('Error fetching products:', error.message);
+                        this.error = 'Unable to load products. Please check your connection and try again.';
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                searchProducts() {
+                    let filtered = this.products.filter(product =>
+                        product.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                        product.description.toLowerCase().includes(this.searchQuery.toLowerCase())
+                    );
+                    this.filteredProducts = filtered;
+                    this.sortProducts();
+                },
+                sortProducts() {
+                    let sorted = [...this.filteredProducts];
+                    if (this.sortOption === 'name-asc') {
+                        sorted.sort((a, b) => a.name.localeCompare(b.name));
+                    } else if (this.sortOption === 'name-desc') {
+                        sorted.sort((a, b) => b.name.localeCompare(a.name));
+                    } else if (this.sortOption === 'price-asc') {
+                        sorted.sort((a, b) => a.price - b.price);
+                    } else if (this.sortOption === 'price-desc') {
+                        sorted.sort((a, b) => b.price - a.price);
+                    }
+                    this.filteredProducts = sorted;
+                },
+                updateCountdownTimer() {
+                    const saleEnd = new Date('2025-06-14T23:59:00+05:30');
+                    const now = new Date();
+                    const diff = saleEnd - now;
+
+                    if (diff <= 0) {
+                        this.countdownTimer = '00:00:00';
+                        return;
+                    }
+
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    this.countdownTimer = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                },
+                viewProduct(product) {
+                    this.currentProduct = product;
+                    this.currentQuantity = 1;
+                    this.currentPage = 'product-details';
+                },
+                addToCart(product) {
+                    const existingItem = this.cart.find(item => item.id === product.id);
+                    if (existingItem) {
+                        existingItem.quantity += this.currentQuantity;
+                    } else {
+                        this.cart.push({ ...product, quantity: this.currentQuantity });
+                    }
+                    this.currentQuantity = 1;
+                },
+                updateQuantity(item, quantity) {
+                    if (quantity < 1) {
+                        this.removeFromCart(item);
+                    } else {
+                        item.quantity = quantity;
+                    }
+                },
+                removeFromCart(item) {
+                    this.cart = this.cart.filter(i => i.id !== item.id);
+                },
+                calculateTotal() {
+                    return this.cart.reduce((total, item) => total + item.price * item.quantity, 0);
+                },
+                calculateShipping() {
+                    return this.cart.length ? 500 : 0;
+                },
+                calculateTax() {
+                    return this.calculateTotal() * 0.08;
+                },
+                calculateGrandTotal() {
+                    return this.calculateTotal() + this.calculateShipping() + this.calculateTax();
+                },
+                calculateTotalRevenue() {
+                    return this.orders.reduce((total, order) => total + order.total, 0);
+                },
+                async placeOrder() {
+                    try {
+                        this.isLoading = true;
+                        const order = {
+                            customer: { ...this.checkoutForm },
+                            items: this.cart.map(item => ({
+                                id: item.id,
+                                name: item.name,
+                                price: item.price,
+                                quantity: item.quantity
+                            })),
+                            subtotal: this.calculateTotal(),
+                            shipping: this.calculateShipping(),
+                            tax: this.calculateTax(),
+                            total: this.calculateGrandTotal(),
+                            date: new Date(),
+                            status: 'pending'
+                        };
+                        const response = await axios.post('/api/orders', order);
+                        this.currentOrder = response.data.order;
+                        this.cart = [];
+                        this.currentPage = 'order-confirmation';
+                        this.logUserActivity('Placed order #' + this.currentOrder.id);
+                    } catch (error) {
+                        console.error('Error placing order:', error.message);
+                        this.error = 'Failed to place your order. Please try again.';
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                validateLoginForm() {
+                    this.loginError = '';
+                },
+                validateRegisterForm() {
+                    this.registerError = '';
+                    if (this.registerForm.password !== this.registerForm.confirmPassword) {
+                        this.registerError = 'Passwords do not match';
+                    }
+                },
+                async login() {
+                    try {
+                        this.isSubmitting = true;
+                        this.loginError = '';
+                        const response = await axios.post('/api/login', this.loginForm);
+                        if (response.data.success) {
+                            this.currentUser = response.data.user;
+                            this.currentPage = 'home';
+                            await Promise.all([this.fetchOrders(), this.fetchUsers()]);
+                            this.logUserActivity('Logged in');
+                        } else {
+                            this.loginError = response.data.message;
+                        }
+                    } catch (error) {
+                        console.error('Login error:', error.message);
+                        this.loginError = 'Login failed. Please try again.';
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                },
+                async register() {
+                    if (this.registerForm.password !== this.registerForm.confirmPassword) {
+                        this.registerError = 'Passwords do not match';
+                        return;
+                    }
+                    try {
+                        this.isSubmitting = true;
+                        this.registerError = '';
+                        const response = await axios.post('/api/register', this.registerForm);
+                        if (response.data.success) {
+                            this.currentUser = response.data.user;
+                            this.currentPage = 'home';
+                            await this.fetchUsers();
+                            this.logUserActivity('Registered');
+                        } else {
+                            this.registerError = response.data.message;
+                        }
+                    } catch (error) {
+                        console.error('Registration error:', error.message);
+                        this.registerError = 'Registration failed. Please try again.';
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                },
+                resetPassword() {
+                    if (!this.forgotPasswordEmail) {
+                        alert('Please enter your email address.');
+                        return;
+                    }
+                    alert('Password reset link sent to ' + this.forgotPasswordEmail);
+                    this.showForgotPasswordModal = false;
+                    this.forgotPasswordEmail = '';
+                },
+                logout() {
+                    this.logUserActivity('Logged out');
+                    this.currentUser = null;
+                    this.currentPage = 'home';
+                    this.cart = [];
+                },
+                getTotalCartItems() {
+                    return this.cart.reduce((total, item) => total + item.quantity, 0);
+                },
+                async fetchOrders() {
+                    try {
+                        const response = await axios.get('/api/orders');
+                        this.orders = response.data;
+                    } catch (error) {
+                        console.error('Error fetching orders:', error.message);
+                        this.error = 'Failed to load orders. Please try again.';
+                    }
+                },
+                async fetchUsers() {
+                    try {
+                        const response = await axios.get('/api/users');
+                        this.users = response.data;
+                    } catch (error) {
+                        console.error('Error fetching users:', error.message);
+                        this.error = 'Failed to load users. Please try again.';
+                    }
+                },
+                openProductForm(product = null) {
+                    this.editingProduct = product;
+                    this.productForm = product
+                        ? { ...product }
+                        : {
+                            name: '',
+                            category: 'rackets',
+                            price: 0,
+                            stock: 0,
+                            description: '',
+                            image: '',
+                            weight: 0
+                        };
+                    this.showProductForm = true;
+                },
+                async saveProduct() {
+                    try {
+                        this.isLoading = true;
+                        if (this.editingProduct) {
+                            await axios.put(`/api/products/${this.editingProduct.id}`, this.productForm);
+                            this.logUserActivity('Edited product #' + this.editingProduct.id);
+                        } else {
+                            await axios.post('/api/products', this.productForm);
+                            this.logUserActivity('Added new product');
+                        }
+                        await this.fetchProducts();
+                        this.showProductForm = false;
+                    } catch (error) {
+                        console.error('Error saving product:', error.message);
+                        alert('Failed to save product. Please try again.');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                async deleteProduct(id) {
+                    try {
+                        this.isLoading = true;
+                        await axios.delete(`/api/products/${id}`);
+                        this.logUserActivity('Deleted product #' + id);
+                        await this.fetchProducts();
+                    } catch (error) {
+                        console.error('Error deleting product:', error.message);
+                        alert('Failed to delete product. Please try again.');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                async deleteSelectedProducts() {
+                    if (!confirm('Are you sure you want to delete the selected products?')) return;
+                    try {
+                        this.isLoading = true;
+                        for (const id of this.selectedProducts) {
+                            await axios.delete(`/api/products/${id}`);
+                            this.logUserActivity('Deleted product #' + id);
+                        }
+                        await this.fetchProducts();
+                        this.selectedProducts = [];
+                        this.selectAllProducts = false;
+                    } catch (error) {
+                        console.error('Error deleting products:', error.message);
+                        alert('Failed to delete selected products.');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                toggleSelectAllProducts() {
+                    this.selectedProducts = this.selectAllProducts ? this.products.map(p => p.id) : [];
+                },
+                viewOrder(order) {
+                    this.selectedOrder = order;
+                },
+                async updateOrderStatus() {
+                    try {
+                        this.isLoading = true;
+                        await axios.put(`/api/orders/${this.selectedOrder.id}`, { status: this.selectedOrder.status });
+                        this.logUserActivity('Updated status of order #' + this.selectedOrder.id);
+                        await this.fetchOrders();
+                    } catch (error) {
+                        console.error('Error updating order status:', error.message);
+                        alert('Failed to update order status.');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                async deleteOrder(id) {
+                    try {
+                        this.isLoading = true;
+                        await axios.delete(`/api/orders/${id}`);
+                        this.logUserActivity('Deleted order #' + id);
+                        await this.fetchOrders();
+                    } catch (error) {
+                        console.error('Error deleting order:', error.message);
+                        alert('Failed to delete order. Please try again.');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                async toggleUserRole(user) {
+                    try {
+                        this.isLoading = true;
+                        const response = await axios.put(`/api/users/${user.id}/role`, { isAdmin: !user.isAdmin });
+                        if (response.data.success) {
+                            user.isAdmin = response.data.user.isAdmin;
+                            this.logUserActivity(`Changed role of user ${user.name} to ${user.isAdmin ? 'Admin' : 'Customer'}`);
+                        } else {
+                            alert(response.data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error toggling user role:', error.message);
+                        alert('Failed to update user role.');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                async deleteUser(id) {
+                    try {
+                        this.isLoading = true;
+                        const response = await axios.delete(`/api/users/${id}`);
+                        if (response.data.success) {
+                            this.users = this.users.filter(u => u.id !== id);
+                            this.logUserActivity('Deleted user #' + id);
+                        } else {
+                            alert(response.data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error deleting user:', error.message);
+                        alert('Failed to delete user.');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                exportProducts() {
+                    const csv = [
+                        ['ID', 'Name', 'Category', 'Price', 'Stock', 'Description', 'Image', 'Weight'],
+                        ...this.products.map(p => [
+                            p.id,
+                            `"${p.name}"`,
+                            p.category,
+                            p.price,
+                            p.stock,
+                            `"${p.description}"`,
+                            p.image,
+                            p.weight
+                        ])
+                    ].map(row => row.join(',')).join('\n');
+                    this.downloadCSV(csv, 'products_export.csv');
+                    this.logUserActivity('Exported products data');
+                },
+                exportOrders() {
+                    const csv = [
+                        ['Order ID', 'Customer Name', 'Email', 'Date', 'Total', 'Status'],
+                        ...this.orders.map(o => [
+                            o.id,
+                            `"${o.customer.firstName} ${o.customer.lastName}"`,
+                            o.customer.email,
+                            new Date(o.date).toLocaleDateString(),
+                            o.total,
+                            o.status
+                        ])
+                    ].map(row => row.join(',')).join('\n');
+                    this.downloadCSV(csv, 'orders_export.csv');
+                    this.logUserActivity('Exported orders data');
+                },
+                exportUsers() {
+                    const csv = [
+                        ['ID', 'Name', 'Email', 'Role', 'Registered On'],
+                        ...this.users.map(u => [
+                            u.id,
+                            `"${u.name}"`,
+                            u.email,
+                            u.isAdmin ? 'Admin' : 'Customer',
+                            new Date(u.createdAt).toLocaleDateString()
+                        ])
+                    ].map(row => row.join(',')).join('\n');
+                    this.downloadCSV(csv, 'users_export.csv');
+                    this.logUserActivity('Exported users data');
+                },
+                downloadCSV(csv, filename) {
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.setAttribute('download', filename);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                },
+                logUserActivity(action) {
+                    if (!this.currentUser) return;
+                    this.userActivityLogs.push({
+                        id: this.userActivityLogs.length + 1,
+                        userName: this.currentUser.name,
+                        action: action,
+                        timestamp: new Date()
+                    });
+                },
+                subscribeNewsletter() {
+                    if (!this.newsletterEmail) {
+                        alert('Please enter a valid email address.');
+                        return;
+                    }
+                    alert('Subscribed to newsletter!');
+                    this.newsletterEmail = '';
+                },
+                handleImageError(event) {
+                    event.target.src = '/static/images/placeholder.jpg';
+                }
+            },
+            created() {
+                this.fetchProducts();
+                this.updateCountdownTimer();
+                setInterval(this.updateCountdownTimer, 1000);
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94e978068df746f6',t:'MTc0OTczMjU3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96199e49fd532965',t:'MTc1MjkyMTgxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
