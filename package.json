@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "python -m pip install -r pro/requirements.txt && python pro/app.py",
-    "build": "python -m pip install -r pro/requirements.txt && python pro/app.py",
+    "dev": "python pro/app.py",
+    "build": "python pro/app.py",
     "preview": "python pro/app.py"
   },
   "devDependencies": {}
