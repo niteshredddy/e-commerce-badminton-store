@@ -1,0 +1,12 @@
+{
+  "name": "pro-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "cd pro && python app.py",
+    "build": "echo 'Build completed'",
+    "preview": "cd pro && python app.py"
+  },
+  "devDependencies": {}
+}
