@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "cd pro && python app.py",
+    "dev": "python pro/app.py",
     "build": "echo 'Build completed'",
-    "preview": "cd pro && python app.py"
+    "preview": "python pro/app.py"
   },
   "devDependencies": {}
 }
