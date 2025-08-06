@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "python pro/app.py",
-    "build": "echo 'Build completed'",
+    "dev": "pip install -r pro/requirements.txt && python pro/app.py",
+    "build": "pip install -r pro/requirements.txt && python pro/app.py"
     "preview": "python pro/app.py"
   },
   "devDependencies": {}
