@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node server.js",
-    "build": "node server.js",
-    "preview": "node server.js",
-    "start": "node server.js"
+    "dev": "node server.cjs",
+    "build": "node server.cjs",
+    "preview": "node server.cjs",
+    "start": "node server.cjs"
   },
   "devDependencies": {},
   "dependencies": {
